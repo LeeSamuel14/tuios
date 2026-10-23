@@ -26,6 +26,7 @@ Start with "tuios keybinds list". Use "tuios keybinds explain <key>" to see
 what one key does.`,
 	}
 
+	//register keybinds sub commands
 	keybindsCmd.AddCommand(
 		newKeybindsListCommand(),
 		newKeybindsCustomCommand(),

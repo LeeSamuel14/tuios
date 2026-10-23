@@ -127,86 +127,7 @@ func newRootCommand() *cobra.Command {
 
 	keybindsCmd := newKeybindsCommand()
 
-	tapeCmd := &cobra.Command{
-		Use:   "tape",
-		Short: "Manage and run .tape automation scripts",
-		Long: `Manage and execute .tape automation scripts for TUIOS
-
-Tape files allow you to automate interactions with TUIOS by specifying
-sequences of commands, key presses, and delays. Execute scripts in
-interactive mode (visible TUI) to watch automation happen in real-time.`,
-		Example: `  # Run tape with visible TUI (watch it happen)
-  tuios tape play demo.tape
-
-  # Validate tape file syntax
-  tuios tape validate demo.tape`,
-	}
-
-	tapePlayCmd := &cobra.Command{
-		Use:   "play <file.tape>",
-		Short: "Run a tape file in interactive mode",
-		Long: `Execute a tape script while displaying the TUIOS TUI
-
-In interactive mode, you can see the automation happening in real-time
-in the terminal UI. Press Ctrl+P to pause/resume playback.`,
-		Args: cobra.ExactArgs(1),
-		RunE: func(_ *cobra.Command, args []string) error {
-			return runTapeInteractive(args[0])
-		},
-	}
-
-	tapeValidateCmd := &cobra.Command{
-		Use:   "validate <file.tape>",
-		Short: "Validate a tape file without running it",
-		Long:  `Check if a tape file is syntactically correct`,
-		Args:  cobra.ExactArgs(1),
-		RunE: func(_ *cobra.Command, args []string) error {
-			return validateTapeFile(args[0])
-		},
-	}
-
-	var tapeListJSON bool
-	tapeListCmd := &cobra.Command{
-		Use:   "list",
-		Short: "List all saved tape recordings",
-		Long: `List the tape files in the tape recordings directory, with the size and the
-time each one last changed. 'tuios tape dir' prints the directory.`,
-		RunE: func(_ *cobra.Command, _ []string) error {
-			return listTapeFiles(tapeListJSON)
-		},
-	}
-	tapeListCmd.Flags().BoolVar(&tapeListJSON, "json", false, "Output as JSON")
-
-	tapeDirCmd := &cobra.Command{
-		Use:   "dir",
-		Short: "Show the tape recordings directory path",
-		Long:  `Print the path where tape recordings are stored`,
-		RunE: func(_ *cobra.Command, _ []string) error {
-			return showTapeDirectory()
-		},
-	}
-
-	tapeDeleteCmd := &cobra.Command{
-		Use:   "delete <name>",
-		Short: "Delete a tape recording",
-		Long:  `Delete a tape file from the recordings directory`,
-		Args:  cobra.ExactArgs(1),
-		RunE: func(_ *cobra.Command, args []string) error {
-			return deleteTapeFile(args[0])
-		},
-	}
-
-	tapeShowCmd := &cobra.Command{
-		Use:   "show <name>",
-		Short: "Display the contents of a tape file",
-		Long:  `Print the contents of a tape recording to stdout`,
-		Args:  cobra.ExactArgs(1),
-		RunE: func(_ *cobra.Command, args []string) error {
-			return showTapeFile(args[0])
-		},
-	}
-
-	tapeCmd.AddCommand(tapePlayCmd, tapeValidateCmd, tapeListCmd, tapeDirCmd, tapeDeleteCmd, tapeShowCmd)
+	tapeCmd := newTapeCommand()
 
 	var createIfMissing bool
 	var attachHost string
@@ -2526,7 +2447,7 @@ The template itself is a JSON file in the directory 'tuios layout dir' prints.`,
 	// The interface flags ride only the commands that draw the interface. They
 	// were persistent on the root once, which buried a read command's few real
 	// flags under twenty appearance ones in its help.
-	registerInterfaceFlags(rootCmd, attachCmd, newCmd, sshCmd, tapePlayCmd)
+	registerInterfaceFlags(rootCmd, attachCmd, newCmd, sshCmd, newTapePlayCommand())
 
 	var listAgentsSession string
 	var listAgentsAll bool
